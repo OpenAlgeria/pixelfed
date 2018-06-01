@@ -8,6 +8,12 @@ body, button, input, textarea {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
+.bg-pixelfed {
+  background:#10c5f8;
+  background:-webkit-gradient(linear,left top,right bottom,from(#6736dd),to(#10c5f8));
+  background:linear-gradient(to bottom right,#6736dd,#10c5f8);
+}
+
 @media (min-width: 1200px) {
   .container {
       max-width: 935px;
@@ -66,8 +72,21 @@ body, button, input, textarea {
   height: 360px !important;
 }
 
+
 .card.status-container.orientation-portrait .status-comments {
   height: 528px !important;
+}
+
+.card.status-container.orientation-landscape .status-photo img {
+  max-height: 451px !important;
+}
+
+.card.status-container.orientation-square .status-photo img {
+  max-height: 601px !important;
+}
+
+.card.status-container.orientation-portrait .status-photo img {
+  max-height: 772px !important;
 }
 
 .no-caret.dropdown-toggle {
@@ -76,4 +95,13 @@ body, button, input, textarea {
 
 .no-caret.dropdown-toggle::after {
   display:none;
+}
+
+.notification-page .profile-link {
+  color: #212529;
+  font-weight: bold;
+}
+
+.notification-page .list-group-item:first-child {
+  border-top: none;
 }

@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Auth;
+use App\Jobs\StatusPipeline\NewStatusPipeline;
+use Auth, Hashids;
 use App\{Comment, Profile, Status};
-use Vinkla\Hashids\Facades\Hashids;
 
 class CommentController extends Controller
 {
@@ -13,30 +13,32 @@ class CommentController extends Controller
     {
       if(Auth::check() === false) { abort(403); }
       $this->validate($request, [
-        'item'    => 'required|alpha_num',
+        'item'    => 'required|integer',
         'comment' => 'required|string|max:500'
       ]);
-
-      try {
-        $statusId = Hashids::decode($request->item)[0];
-      } catch (Exception $e) {
-        abort(500);
-      }
+      $comment = $request->input('comment');
+      $statusId = $request->item;
 
       $user = Auth::user();
       $profile = $user->profile;
       $status = Status::findOrFail($statusId);
 
-      $comment = new Comment;
-      $comment->profile_id = $profile->id;
-      $comment->user_id = $user->id;
-      $comment->status_id = $status->id;
-      $comment->comment = e($request->comment);
-      $comment->rendered = e($request->comment);
-      $comment->is_remote = false;
-      $comment->entities = null;
-      $comment->save();
+      $reply = new Status();
+      $reply->profile_id = $profile->id;
+      $reply->caption = $comment;
+      $reply->rendered = $comment;
+      $reply->in_reply_to_id = $status->id;
+      $reply->in_reply_to_profile_id = $status->profile_id;
+      $reply->save();
 
-      return redirect($status->url());
+      NewStatusPipeline::dispatch($reply, false);
+
+      if($request->ajax()) {
+        $response = ['code' => 200, 'msg' => 'Comment saved'];
+      } else {
+        $response = redirect($status->url());
+      }
+
+      return $response;
     }
 }
